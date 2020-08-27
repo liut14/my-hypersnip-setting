@@ -1,0 +1,673 @@
+global
+// JavaScript code
+function gen_matrix(nrow, ncol) {
+	let results = "\n";
+	let order = 1;
+	for (var i=0; i<nrow; i++){
+		results += '	';
+		for(var j = 0;j <ncol-1;j++){
+			results += "$" +(order ).toString() + " & ";
+			order ++;
+		}
+		results += " $"+(order).toString() +" \\\\"+ "\\"+ "\n";
+		order ++;
+	}
+	return results;
+}
+
+function tes_matrix(nrow, ncol,t) {
+	let results = "\n";
+	let order = 1;
+	for (var i=0; i<nrow; i++){
+		results += '	';
+		for(var j = 0;j <ncol-1;j++){
+			if (order > 1 ){
+				results += "${" +(order ).toString() + ":" + t[order-2] + "}\t & ";
+			}
+			else{
+				results += "$" +(order ).toString()  + " & ";
+			}
+			order ++;
+		}
+		results += " $"+(order).toString() +" \\\\"+ "\\"+ "\n";
+		order ++;
+	}
+	return results;
+}
+
+endglobal
+
+
+snippet // "Fraction" iA
+\\frac{$1}{$2}$0
+endsnippet
+
+snippet >= "lkjl" iA
+\geqslant $0
+endsnippet
+
+snippet <= "Fraction" iA
+\leqslant $0
+endsnippet
+
+snippet != "no equals" iA
+\neq 
+endsnippet
+
+snippet == " constan equals" iA
+\equiv 
+endsnippet
+
+snippet ~~ " appro equals" iA
+\thickapprox 
+endsnippet
+
+snippet ~= " appro equals2" iA
+\cong
+endsnippet
+
+context "math()"
+snippet || "mid" iA
+ \mid 
+endsnippet
+
+snippet `((\d+)|(\d*)(\\)?([A-Za-z]+)((\^|_)(\{\d+\}|\d))*)/` "Fraction no ()" A
+\frac{``rv = m[1]``}{$1}$0
+endsnippet
+
+snippet `^.*\)/` "Fraction with ()" A
+``
+    let str = m[0];
+    str = str.slice(0, -1);
+    let lastIndex = str.length - 1;
+
+    let depth = 0;
+    let i = str.length - 1;
+
+    while (true) {
+        if (str[i] == ')') depth += 1;
+        if (str[i] == '(') depth -= 1;
+        if (depth == 0) break;
+        i -= 1;
+    }
+
+    let results = str.slice(0, i) + "\\frac{" + str.slice(i+1, -1) + "}";
+    results += "{$1}$0";
+    rv = results;
+    ``
+endsnippet
+
+
+snippet `(\\?[a-zA-Z]\w*)(bar|BAR)` "Bar" iA
+\overline{``rv = m[1]``}
+endsnippet
+
+snippet `(\\?[a-zA-Z]\w*)(td|TD)` "tilde" iA
+\widetilde{``rv = m[1]``}
+endsnippet
+
+snippet `(\\?[a-zA-Z]\w*)(hat|HAT)` "hat" iA
+\hat{``rv = m[1]``}
+endsnippet
+
+snippet `(\\?[a-zA-Z]\w*)(bf|BF)` "mathbf" iA
+\mathbf{``rv = m[1]``}
+endsnippet
+
+snippet `(\\?[a-zA-Z]\w*)(bm|BM)` "bm" iA
+\bm{``rv = m[1]``}
+endsnippet
+
+snippet bar "bar" A
+\overline{$1}$0
+endsnippet
+
+snippet hat "hat" A
+\hat{$1}$0
+endsnippet
+
+snippet `(\\?[a-zA-Z]\w*)(,,)` "Vector postfix" iA
+\vv{``rv = m[1]``}
+endsnippet
+
+snippet HH "H" iA
+\mathbb{H}
+endsnippet
+
+snippet DD "D" iA
+\mathbb{D}
+endsnippet
+
+
+snippet table "Table environment" b
+\begin{table}[${1:htpb}]
+	\centering
+	\caption{${2:caption}}
+	\label{tab:${3:label}}
+	\begin{tabular}{${5:c}}
+	$0${5/((?<=.)c|l|r)|./(?1: & )/g}
+	\end{tabular}
+\end{table}
+endsnippet
+
+snippet fig "Figure environment" b
+\begin{figure}[${1:htpb}]
+	\centering
+	${2:\includegraphics[width=0.8\textwidth]{$3}}
+	\caption{${4:$3}}
+	\label{fig:${5:${3/\W+/-/g}}}
+\end{figure}
+endsnippet
+
+snippet plot "Plot" w
+\begin{figure}[$1]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			xmin= ${2:-10}, xmax= ${3:10},
+			ymin= ${4:-10}, ymax = ${5:10},
+			axis lines = middle,
+		]
+			\addplot[domain=$2:$3, samples=${6:100}]{$7};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{$8}
+	\label{${9:$8}}
+\end{figure}
+endsnippet
+
+snippet node "Tikz node" w
+\node[$5] (${1/[^0-9a-zA-Z]//g}${2}) ${3:at (${4:0,0}) }{$${1}$};
+$0
+endsnippet
+
+priority 100
+snippet ... "cdots" iA
+\cdots 
+endsnippet
+
+snippet => "implies" Ai
+\implies
+endsnippet
+
+snippet =< "implied by" Ai
+\impliedby
+endsnippet
+
+snippet ifonlyif "if and only if" wA
+\iff
+endsnippet
+
+snippet im "inline Math" wA
+$ ${1} $$0
+endsnippet
+
+snippet im "inline Math" wA
+$${1}$``
+let str = t[0];
+let test = str.charAt(str.length - 1);
+if (test != ',' &&  test != '.' &&  test != '-' && test !='?' && test !=' '){
+	rv = ' ';
+}
+else{
+	rv = '';
+}``$2
+endsnippet
+
+snippet dm "display Math" wA
+\[
+	${1}
+\]$0
+endsnippet
+
+priority 100
+snippet `([A-Za-z])(\d)` "auto subscript" wA
+`` rv = m[1]``_``rv = m[2]``
+endsnippet
+
+snippet `([A-Za-z])_(\d+)` "auto subscript2" wA
+`` rv = m[1]``_{``rv = m[2]``$1}$0
+endsnippet
+
+snippet math "mathematicablock" w
+math $1 math $0
+endsnippet
+
+
+snippet ceil "ceil" iA
+\left\lceil $1 \right\rceil $0
+endsnippet
+
+snippet floor "floor" iA
+\left\lfloor $1 \right\rfloor$0
+endsnippet
+
+snippet lr "left( right)" i
+\left( ${1} \right) $0
+endsnippet
+
+snippet lr| "left| right|" i
+\left| ${1} \right| $0
+endsnippet
+
+snippet lr{ "left\{ right\}" i
+\left\\{ ${1} \right\\} $0
+endsnippet
+
+snippet lrb "left\{ right\}" i
+\left\\{ ${1} \right\\} $0
+endsnippet
+
+snippet lr[ "left[ right]" i
+\left[ ${1} \right] $0
+endsnippet
+
+snippet lra "leftangle rightangle" iA
+\left<${1} \right>$0
+endsnippet
+
+snippet sum "sum" w
+\sum_{n=${1:1}}^{${2:\infty}} ${3:a_n z^n}
+endsnippet
+
+snippet taylor "taylor" w
+\sum_{${1:k}=${2:0}}^{${3:\infty}} ${4:c_$1} (x-a)^$1 $0
+endsnippet
+
+snippet lim "limit" w
+\lim_{${1:n} \to ${2:\infty}} 
+endsnippet
+
+snippet limsup "limsup" w
+\limsup_{${1:n} \to ${2:\infty}} 
+endsnippet
+
+snippet prod "product" w
+\prod_{${1:n=${2:1}}}^{${3:\infty}} ${4:${VISUAL}} $0
+endsnippet
+
+snippet part "d/dx" w
+\frac{\partial ${1:V}}{\partial ${2:x}} $0
+endsnippet
+
+snippet diff "d/dx" w
+\frac{\mathrm{d}${1:y}}{\mathrm{d}${2:x}} $0
+endsnippet
+
+snippet sq "\sqrt{}" iA
+\sqrt{${1}} $0
+endsnippet
+
+snippet pmat "pmat" w
+\begin{pmatrix} 
+    ${1: } 
+\end{pmatrix} $0
+endsnippet
+
+snippet bmat "pmat" w
+\begin{bmatrix} 
+    $1 
+\end{bmatrix} $0
+endsnippet
+
+snippet oo "\infty" wA
+\infty
+endsnippet
+
+snippet rij "mrij" i
+(${1:x}_${2:n})_{${3:$2} \\in ${4:N}}$0
+endsnippet
+
+snippet EE "geq" iA
+\exists 
+endsnippet
+
+
+snippet AA "forall" iA
+\forall 
+endsnippet
+
+
+snippet xnn "xn" iA
+x_{n}
+endsnippet
+
+
+snippet ynn "yn" iA
+y_{n}
+endsnippet
+
+
+snippet xii "xi" iA
+x_{i}
+endsnippet
+
+snippet yii "yi" iA
+y_{i}
+endsnippet
+
+
+snippet xjj "xj" iA
+x_{j}
+endsnippet
+
+
+snippet yjj "yj" iA
+y_{j}
+endsnippet
+
+snippet `\b([a-zA-Z])ii` "?i" iA
+``rv = m[1]``_{i}
+endsnippet
+
+snippet `(\d[a-zA-Z]|\\mu|\\alpha|\\sigma|\\rho|\\beta|\\gamma|\\delta|\\zeta|\\eta|\\varepsilon|\\theta|\\iota|\\kappa|\\vartheta|\\lambda|\\nu|\\pi|\\rho|\\tau|\\upsilon|\\phi|\\chi|\\psi|\\omega|\\Gamma|\\Delta|\\Theta|\\Lambda|\\Xi|\\Pi|\\Sigma|\\Upsilon|\\Phi|\\Psi|\\Omega)ii` "?i" iA
+``rv = m[1]``_{i}
+endsnippet
+
+priority 100
+snippet `\b([a-zA-Z])jj` "?j" riA
+``rv = m[1]``_{j}
+endsnippet
+
+priority 100
+snippet `(\d[a-zA-Z]|\\mu|\\alpha|\\sigma|\\rho|\\beta|\\gamma|\\delta|\\zeta|\\eta|\\varepsilon|\\theta|\\iota|\\kappa|\\vartheta|\\lambda|\\nu|\\pi|\\rho|\\tau|\\upsilon|\\phi|\\chi|\\psi|\\omega|\\Gamma|\\Delta|\\Theta|\\Lambda|\\Xi|\\Pi|\\Sigma|\\Upsilon|\\Phi|\\Psi|\\Omega)jj` "?j" iA
+``rv = m[1]``_{j}
+endsnippet
+
+priority 10000
+snippet `\b([a-zA-Z])n(\d)` "x[n+1]" iA
+``rv = m[1]``_{${1:n}+``rv = m[2]``}$0
+endsnippet
+
+
+snippet xn1 "x" iA
+x_{n+1}
+endsnippet
+
+snippet xmm "x" iA
+x_{m}
+endsnippet
+
+snippet R+ "R0+" iA
+R_0^+
+endsnippet
+
+snippet xx "cross" iA
+\times 
+endsnippet
+
+snippet case "cases" w
+\begin{cases}
+	$1
+\end{cases}
+endsnippet
+
+snippet bigdef "Big function" iA
+\begin{equation$6}
+    \begin{aligned}
+        $1\colon $2 &\longrightarrow $3 \\\\
+                 $4 &\longmapsto $1($4) = $5
+    \end{aligned}
+\end{equation$6}$0
+endsnippet
+
+snippet bigmin "Optimization problem" iA
+\begin{equation$4}
+	\begin{aligned}
+		\min &\quad ${1:f(x)}\\\\
+		\text{s.t.} &\quad ${2:g(x)} \leq 0\\\\
+					&\quad ${3:h(x)} = 0\\\\
+	\end{aligned}
+\end{equaiton$4}$0
+endsnippet
+
+snippet bigmax "Optimization problem" wA
+\begin{equation$4}
+	\begin{aligned}
+		\max &\quad ${1:f(x)}\\\\
+		\text{s.t.} &\quad ${2:g(x)} \leq 0\\\\
+					&\quad ${3:h(x)} = 0\\\\
+	\end{aligned}
+\end{equation$4}$0
+endsnippet
+
+snippet deff "Definition of function" wA
+$1\colon ${2:\\mathbb{R\}} \to ${3:\\mathbb{R\}}, ${4:x} \mapsto $0
+endsnippet
+
+context "math()"
+snippet iid "independent and identical distribution" iA
+\overset{\text{i.i.d.}}{\sim}
+endsnippet
+
+context "math()"
+snippet defe "define equal" wA
+\overset{\underset{\mathrm{def}}{}}{=}
+endsnippet
+
+snippet `(?<!i)stt` "text subscript" iA
+_\text{$1} $0
+endsnippet
+
+snippet `(?<!i)stit` "text subscript" iA
+_\textit{$1} $0
+endsnippet
+
+snippet tt "text" iA
+\text{$1}$0
+endsnippet
+
+snippet tit "text it" iA
+\textit{$1}$0
+endsnippet
+
+snippet `(\\\\)([a-zA-Z])` iA
+\mathbb{\\MakeUppercase{``rv = m[2]``}}
+endsnippet
+
+snippet notin wA
+\notin
+endsnippet
+
+snippet buu "bigcup" wA
+\bigcup_{${1:i \in ${2: I}}} $0
+endsnippet
+
+snippet bnn "bigcap" wA
+\bigcap_{${1:i \in ${2: I}}} $0
+endsnippet
+
+snippet invs "inverse" wA
+^{-1}
+endsnippet
+
+priority 10000
+snippet `(trans|TRANS)` "inverse" wA
+^{T}
+endsnippet
+
+snippet compl "complement" wA
+^{c}
+endsnippet
+
+priority 100
+snippet -> "to" iA
+\to 
+endsnippet
+
+
+snippet !> "mapsto" iA
+\mapsto 
+endsnippet
+
+
+snippet cvec "column vector" iA
+\begin{pmatrix} ${1:x}_${2:1}\\\\ \vdots \\\\ $1_${3:n} \end{pmatrix}$0
+endsnippet
+
+snippet rvec "row vector" iA
+\begin{pmatrix} ${1:x}_${2:1}, \cdots ,$1_${3:n} \end{pmatrix}$0
+endsnippet
+
+priority 300
+snippet `(DINT|dint)` "integral" wA
+\int_{${1:-\infty}}^{${2:\infty}} ${3} \\mathrm{d}${4:x} $0
+endsnippet
+
+priority 100
+snippet `(?<!\\)(sin|cos|arccot|cot|csc|ln|log|exp|star|perp)` "ln" wA
+\\``rv = m[1]``
+endsnippet
+
+priority 200
+snippet `(?<!\\)(arcsin|arccos|arctan|arccot|arccsc|arcsec|pi|zeta|int)` "ln" wA
+\\``rv = m[1]``
+endsnippet
+
+priority 200
+context "math()"
+snippet `(?<![\\a-zA-Z])(mu|alpha|sigma|rho|beta|gamma|delta|zeta|eta|varepsilon|theta|iota|kappa|vartheta|lambda|nu|pi|rho|tau|upsilon|phi|chi|psi|omega|Gamma|Delta|Theta|Lambda|Xi|Pi|Sigma|Upsilon|Phi|Psi|Omega)` "greek" wA
+\\``rv = m[1]``
+endsnippet
+
+priority 100
+context "math()"
+snippet `(?<![\\a-zA-Z])(diag|rank|lcm)` "math function" wA
+\\operatorname{``rv = m[1]``}
+endsnippet
+// tr 尚未加入
+
+snippet `(?<![\\a-zA-Z])arg(max|min)` "argmin/max" wA
+\mathop{\arg\\ ``rv = m[1]``}
+endsnippet
+
+snippet ' "prime" i
+^\prime
+endsnippet
+
+context "math()"
+snippet -- "setminus" iA
+\setminus
+endsnippet
+
+snippet norm "norm" iA
+\| $1 \| $0
+endsnippet
+
+snippet lll "l" iA
+\ell
+endsnippet
+
+snippet nabla "nabla" iA
+\nabla 
+endsnippet
+
+snippet `(?<!\\)nabla` "nabla" iA
+\nabla 
+endsnippet
+
+snippet tp "to the ... power" iA
+^ {${1:2}} $0
+endsnippet
+
+priority 100
+snippet mcal "mathcal" i
+\mathcal{$1}$0
+endsnippet
+
+snippet mbb "mathbb" i
+\mathbb{$1}$0
+endsnippet
+
+priority 10000
+snippet `([a-zA-Z])mcal` "mathcal" iA
+\mathcal{\\MakeUppercase{``rv = m[1]``}} $0
+endsnippet
+
+priority 100
+snippet ** "star" iA
+^{*}
+endsnippet
+
+snippet abs "abstract value" iA
+\left\vert ${1} \right\vert $0
+endsnippet
+
+context "math()"
+snippet >> ">>" iA
+\gg
+endsnippet
+
+context "math()"
+snippet << "<<" iA
+\ll
+endsnippet
+
+context "math()"
+snippet mean "Expectation" iA
+\mathbb{E}\left[ $1 \right] $0
+endsnippet
+
+
+context "math()"
+snippet cov "Covariance" iA
+\mathrm{Cov} 
+endsnippet
+
+context "math()"
+snippet conv "convex composition" iA
+${1:\alpha} ${2:x} + (1 - $1) ${3:y}
+endsnippet
+
+context "math()"
+snippet range "i = 1, \cdots, n" w
+${1:i} = ${2:1}, \cdots, ${3:n}$0
+endsnippet
+
+context "math()"
+snippet eps "epsilon" w
+\epsilon
+endsnippet
+
+snippet lye "lyapunov equation" wA
+PA + A^{T}P = ${1:-Q} $0
+endsnippet
+
+
+
+snippet letw "let omega" iA
+Let $\Omega \subset C$ be open.
+endsnippet
+
+snippet box "Box" A
+``rv = '┌' + '─'.repeat(t[0].length + 2) + '┐'``
+│ $1 │
+``rv = '└' + '─'.repeat(t[0].length + 2) + '┘'``
+endsnippet
+
+
+snippet dategreeting "Gives you the current date!"
+Hello from your hsnip at ``rv = new Date().toDateString()``!
+endsnippet
+
+priority 10000
+snippet `(b|p)mata([1-9])` "bmatrix" iwA
+\begin{``rv = m[1]``matrix}``
+	let len = m[2];
+	let results = "\n";
+	for (var i=0; i<len; i++){
+		results += '	' + "$1 & ".repeat(len-1) + " $1 \\\\"+ "\\"+ "\n";
+	}
+	rv = results;
+	``\end{``rv = m[1]``matrix}$0
+endsnippet
+
+priority 20000
+snippet `(b|p)mat([1-9]{1})` "bmatrix" iwA
+\begin{``rv = m[1]``matrix}``
+	rv = gen_matrix(m[2],m[2]);
+	``\end{``rv = m[1]``matrix}$0
+endsnippet
+
+
+// 以下均为test
